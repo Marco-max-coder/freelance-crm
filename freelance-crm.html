@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FreelanceCRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #141720;
+    --surface2: #1c2030;
+    --border: #252b3b;
+    --accent: #6ee7b7;
+    --accent2: #818cf8;
+    --accent3: #f472b6;
+    --warn: #fbbf24;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --sidebar-w: 220px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 28px 0;
+    flex-shrink: 0;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.25rem;
+    padding: 0 24px 28px;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--text); }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 24px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--muted);
+    transition: all 0.18s;
+    border-left: 3px solid transparent;
+  }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(110,231,183,0.06); }
+  .nav-icon { font-size: 1.1rem; }
+  .sidebar-bottom { margin-top: auto; padding: 0 24px; }
+  .user-chip {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface2); border-radius: 10px; padding: 10px 12px;
+  }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--accent2), var(--accent3)); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: #fff; }
+  .user-info { font-size: 0.8rem; }
+  .user-info strong { display: block; font-weight: 600; color: var(--text); }
+  .user-info span { color: var(--muted); font-size: 0.72rem; }
+
+  /* MAIN */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar {
+    padding: 20px 32px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface);
+  }
+  .topbar h1 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.4rem; }
+  .topbar-actions { display: flex; gap: 10px; align-items: center; }
+  .btn {
+    padding: 8px 18px; border-radius: 8px; font-size: 0.85rem; font-weight: 500;
+    cursor: pointer; border: none; transition: all 0.18s; font-family: 'DM Sans', sans-serif;
+  }
+  .btn-primary { background: var(--accent); color: #0d0f14; font-weight: 600; }
+  .btn-primary:hover { background: #5dd4a5; transform: translateY(-1px); }
+  .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  .content { flex: 1; overflow-y: auto; padding: 28px 32px; }
+
+  /* PAGES */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* DASHBOARD */
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px 24px; transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: var(--accent); }
+  .stat-label { font-size: 0.78rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; margin-bottom: 4px; }
+  .stat-sub { font-size: 0.78rem; color: var(--muted); }
+  .stat-green { color: var(--accent); }
+  .stat-purple { color: var(--accent2); }
+  .stat-pink { color: var(--accent3); }
+
+  .section-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 16px; color: var(--text); }
+
+  /* CONTACTS TABLE */
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .search-bar {
+    padding: 14px 20px; border-bottom: 1px solid var(--border);
+    display: flex; gap: 12px; align-items: center;
+  }
+  .search-input {
+    flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.875rem;
+    outline: none; transition: border-color 0.18s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { padding: 12px 20px; text-align: left; font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); }
+  tbody tr { transition: background 0.15s; cursor: pointer; }
+  tbody tr:hover { background: var(--surface2); }
+  tbody td { padding: 14px 20px; font-size: 0.875rem; border-bottom: 1px solid var(--border); }
+  tbody tr:last-child td { border-bottom: none; }
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600;
+  }
+  .badge-active { background: rgba(110,231,183,0.12); color: var(--accent); }
+  .badge-inactive { background: rgba(100,116,139,0.12); color: var(--muted); }
+  .badge-prospect { background: rgba(129,140,248,0.12); color: var(--accent2); }
+  .contact-name { font-weight: 600; color: var(--text); }
+  .contact-company { color: var(--muted); font-size: 0.8rem; }
+
+  /* PIPELINE */
+  .pipeline-board { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 12px; height: calc(100vh - 200px); }
+  .pipeline-col {
+    min-width: 220px; flex-shrink: 0;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .col-header {
+    padding: 16px 18px 12px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .col-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.875rem; }
+  .col-count { background: var(--surface2); color: var(--muted); border-radius: 20px; padding: 2px 8px; font-size: 0.72rem; font-weight: 600; }
+  .col-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .col-header-left { display: flex; align-items: center; gap: 8px; }
+  .col-body { flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+  .deal-card {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px; cursor: grab; transition: all 0.18s; user-select: none;
+  }
+  .deal-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+  .deal-card.dragging { opacity: 0.5; cursor: grabbing; }
+  .pipeline-col.drag-over { border-color: var(--accent); background: rgba(110,231,183,0.04); }
+  .deal-title { font-weight: 600; font-size: 0.875rem; margin-bottom: 6px; }
+  .deal-client { font-size: 0.78rem; color: var(--muted); margin-bottom: 10px; }
+  .deal-footer { display: flex; align-items: center; justify-content: space-between; }
+  .deal-value { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem; color: var(--accent); }
+  .deal-date { font-size: 0.72rem; color: var(--muted); }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    padding: 28px; width: 440px; max-width: 95vw;
+  }
+  .modal h2 { font-family: 'Syne', sans-serif; font-weight: 700; margin-bottom: 20px; font-size: 1.1rem; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 0.8rem; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
+  .form-control {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.875rem;
+    outline: none; transition: border-color 0.18s;
+  }
+  .form-control:focus { border-color: var(--accent); }
+  select.form-control option { background: var(--surface2); }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+  /* RECENT DEALS in dashboard */
+  .recent-deals { display: flex; flex-direction: column; gap: 10px; }
+  .recent-deal-row {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 18px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .rdl { display: flex; flex-direction: column; gap: 2px; }
+  .rdl strong { font-size: 0.875rem; font-weight: 600; }
+  .rdl span { font-size: 0.78rem; color: var(--muted); }
+  .stage-pill { padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+  /* Animations */
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  .page.active > * { animation: fadeUp 0.35s ease both; }
+  .page.active > *:nth-child(2) { animation-delay: 0.06s; }
+  .page.active > *:nth-child(3) { animation-delay: 0.12s; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">Free<span>Lance</span>CRM</div>
+  <nav>
+    <div class="nav-item active" onclick="navigate('dashboard', this)">
+      <span class="nav-icon">◈</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="navigate('contacts', this)">
+      <span class="nav-icon">◎</span> Contacts
+    </div>
+    <div class="nav-item" onclick="navigate('pipeline', this)">
+      <span class="nav-icon">◧</span> Pipeline
+    </div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-chip">
+      <div class="avatar">AL</div>
+      <div class="user-info">
+        <strong>Alex Luca</strong>
+        <span>Freelancer</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <h1 id="page-title">Dashboard</h1>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost" id="btn-secondary" style="display:none">Filter</button>
+      <button class="btn btn-primary" id="btn-primary" onclick="openModal()">+ New Contact</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD PAGE -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Deals</div>
+          <div class="stat-value stat-purple" id="stat-total">0</div>
+          <div class="stat-sub">across all stages</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Conversion Rate</div>
+          <div class="stat-value stat-green" id="stat-conv">0%</div>
+          <div class="stat-sub">new lead → won</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Revenue</div>
+          <div class="stat-value stat-pink" id="stat-rev">€0</div>
+          <div class="stat-sub">won deals</div>
+        </div>
+      </div>
+      <div class="section-title">Recent Deals</div>
+      <div class="recent-deals" id="recent-deals-list"></div>
+    </div>
+
+    <!-- CONTACTS PAGE -->
+    <div class="page" id="page-contacts">
+      <div class="table-wrap">
+        <div class="search-bar">
+          <input class="search-input" type="text" placeholder="Search contacts..." oninput="filterContacts(this.value)">
+          <button class="btn btn-ghost" style="font-size:0.8rem">Export</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Company</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="contacts-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PIPELINE PAGE -->
+    <div class="page" id="page-pipeline">
+      <div class="pipeline-board" id="pipeline-board"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD CONTACT MODAL -->
+<div class="modal-overlay" id="contact-modal">
+  <div class="modal">
+    <h2 id="modal-title">Add Contact</h2>
+    <div class="form-group">
+      <label>Full Name</label>
+      <input class="form-control" id="f-name" placeholder="Jane Doe">
+    </div>
+    <div class="form-group">
+      <label>Company</label>
+      <input class="form-control" id="f-company" placeholder="Acme Inc.">
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input class="form-control" id="f-email" type="email" placeholder="jane@acme.com">
+    </div>
+    <div class="form-group">
+      <label>Status</label>
+      <select class="form-control" id="f-status">
+        <option value="prospect">Prospect</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveContact()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD DEAL MODAL -->
+<div class="modal-overlay" id="deal-modal">
+  <div class="modal">
+    <h2>Add Deal</h2>
+    <div class="form-group">
+      <label>Deal Title</label>
+      <input class="form-control" id="d-title" placeholder="Website Redesign">
+    </div>
+    <div class="form-group">
+      <label>Client</label>
+      <input class="form-control" id="d-client" placeholder="Client name">
+    </div>
+    <div class="form-group">
+      <label>Value (€)</label>
+      <input class="form-control" id="d-value" type="number" placeholder="2500">
+    </div>
+    <div class="form-group">
+      <label>Stage</label>
+      <select class="form-control" id="d-stage">
+        <option value="new-lead">New Lead</option>
+        <option value="proposal">Proposal Sent</option>
+        <option value="negotiating">Negotiating</option>
+        <option value="won">Won</option>
+        <option value="lost">Lost</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeDealModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveDeal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// --- DATA ---
+let contacts = [
+  { id: 1, name: 'Marco Bianchi', company: 'Studio MB', email: 'marco@studiomb.it', status: 'active' },
+  { id: 2, name: 'Sara Ricci', company: 'TechFlow', email: 'sara@techflow.com', status: 'prospect' },
+  { id: 3, name: 'Luca Ferrari', company: 'Creativa Srl', email: 'luca@creativa.it', status: 'active' },
+  { id: 4, name: 'Anna Conti', company: 'MediaHouse', email: 'anna@mediahouse.it', status: 'inactive' },
+];
+
+const STAGES = [
+  { id: 'new-lead',    label: 'New Lead',       color: '#818cf8' },
+  { id: 'proposal',   label: 'Proposal Sent',   color: '#fbbf24' },
+  { id: 'negotiating',label: 'Negotiating',     color: '#f472b6' },
+  { id: 'won',        label: 'Won',             color: '#6ee7b7' },
+  { id: 'lost',       label: 'Lost',            color: '#64748b' },
+];
+
+let deals = [
+  { id: 1, title: 'Brand Identity Package', client: 'Studio MB',   value: 3200, stage: 'won',         date: '2025-03' },
+  { id: 2, title: 'E-commerce Website',     client: 'TechFlow',    value: 5800, stage: 'negotiating', date: '2025-04' },
+  { id: 3, title: 'Social Media Kit',       client: 'Creativa Srl',value: 1500, stage: 'proposal',    date: '2025-04' },
+  { id: 4, title: 'UI/UX Audit',            client: 'MediaHouse',  value: 2200, stage: 'new-lead',    date: '2025-04' },
+  { id: 5, title: 'App Mockups',            client: 'TechFlow',    value: 4100, stage: 'won',         date: '2025-02' },
+  { id: 6, title: 'Landing Page',           client: 'Creativa Srl',value: 900,  stage: 'lost',        date: '2025-03' },
+];
+
+let nextContactId = 10;
+let nextDealId = 20;
+let currentPage = 'dashboard';
+let draggedDealId = null;
+
+// --- NAVIGATION ---
+function navigate(page, el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('page-title').textContent = el.textContent.trim().replace(/^./, '').trim();
+  currentPage = page;
+
+  const btnPrimary = document.getElementById('btn-primary');
+  const btnSecondary = document.getElementById('btn-secondary');
+  if (page === 'contacts') {
+    btnPrimary.textContent = '+ New Contact';
+    btnPrimary.onclick = openModal;
+    btnSecondary.style.display = '';
+  } else if (page === 'pipeline') {
+    btnPrimary.textContent = '+ New Deal';
+    btnPrimary.onclick = openDealModal;
+    btnSecondary.style.display = 'none';
+  } else {
+    btnPrimary.textContent = '+ New Contact';
+    btnPrimary.onclick = openModal;
+    btnSecondary.style.display = 'none';
+  }
+
+  if (page === 'dashboard') renderDashboard();
+  if (page === 'contacts') renderContacts(contacts);
+  if (page === 'pipeline') renderPipeline();
+}
+
+// --- DASHBOARD ---
+function renderDashboard() {
+  const total = deals.length;
+  const won = deals.filter(d => d.stage === 'won').length;
+  const leads = deals.filter(d => d.stage === 'new-lead').length;
+  const conv = total > 0 ? Math.round((won / total) * 100) : 0;
+  const rev = deals.filter(d => d.stage === 'won').reduce((s, d) => s + d.value, 0);
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-conv').textContent = conv + '%';
+  document.getElementById('stat-rev').textContent = '€' + rev.toLocaleString('it-IT');
+
+  const list = document.getElementById('recent-deals-list');
+  const recent = [...deals].slice(-5).reverse();
+  list.innerHTML = recent.map(d => {
+    const stage = STAGES.find(s => s.id === d.stage);
+    return `<div class="recent-deal-row">
+      <div class="rdl"><strong>${d.title}</strong><span>${d.client} · ${d.date}</span></div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <span class="stage-pill" style="background:${stage.color}22;color:${stage.color}">${stage.label}</span>
+        <span style="font-family:'Syne',sans-serif;font-weight:700;color:var(--accent)">€${d.value.toLocaleString('it-IT')}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// --- CONTACTS ---
+function renderContacts(list) {
+  const tbody = document.getElementById('contacts-tbody');
+  tbody.innerHTML = list.map(c => `
+    <tr>
+      <td><div class="contact-name">${c.name}</div></td>
+      <td>${c.company}</td>
+      <td style="color:var(--muted)">${c.email}</td>
+      <td><span class="badge badge-${c.status}">${c.status.charAt(0).toUpperCase()+c.status.slice(1)}</span></td>
+      <td><button class="btn btn-ghost" style="padding:5px 10px;font-size:0.75rem" onclick="deleteContact(${c.id})">✕</button></td>
+    </tr>`).join('');
+}
+
+function filterContacts(q) {
+  const filtered = contacts.filter(c =>
+    c.name.toLowerCase().includes(q.toLowerCase()) ||
+    c.company.toLowerCase().includes(q.toLowerCase()) ||
+    c.email.toLowerCase().includes(q.toLowerCase())
+  );
+  renderContacts(filtered);
+}
+
+function deleteContact(id) {
+  contacts = contacts.filter(c => c.id !== id);
+  renderContacts(contacts);
+}
+
+// --- PIPELINE ---
+function renderPipeline() {
+  const board = document.getElementById('pipeline-board');
+  board.innerHTML = STAGES.map(stage => {
+    const stageDeals = deals.filter(d => d.stage === stage.id);
+    const total = stageDeals.reduce((s, d) => s + d.value, 0);
+    return `<div class="pipeline-col" id="col-${stage.id}"
+      ondragover="onDragOver(event, '${stage.id}')"
+      ondragleave="onDragLeave(event)"
+      ondrop="onDrop(event, '${stage.id}')">
+      <div class="col-header">
+        <div class="col-header-left">
+          <div class="col-dot" style="background:${stage.color}"></div>
+          <span class="col-title">${stage.label}</span>
+        </div>
+        <span class="col-count">${stageDeals.length}</span>
+      </div>
+      <div class="col-body" id="body-${stage.id}">
+        ${stageDeals.map(d => `
+          <div class="deal-card" draggable="true" id="deal-${d.id}"
+            ondragstart="onDragStart(event, ${d.id})"
+            ondragend="onDragEnd(event)">
+            <div class="deal-title">${d.title}</div>
+            <div class="deal-client">${d.client}</div>
+            <div class="deal-footer">
+              <span class="deal-value">€${d.value.toLocaleString('it-IT')}</span>
+              <span class="deal-date">${d.date}</span>
+            </div>
+          </div>`).join('')}
+        ${stageDeals.length === 0 ? `<div style="text-align:center;color:var(--muted);font-size:0.78rem;padding:20px 0">Drop here</div>` : ''}
+      </div>
+      <div style="padding:8px 12px;border-top:1px solid var(--border);font-size:0.75rem;color:var(--muted);font-family:'Syne',sans-serif;font-weight:700">
+        ${total > 0 ? '€' + total.toLocaleString('it-IT') : '—'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// DRAG & DROP
+function onDragStart(e, id) {
+  draggedDealId = id;
+  setTimeout(() => e.target.classList.add('dragging'), 0);
+}
+function onDragEnd(e) {
+  e.target.classList.remove('dragging');
+  document.querySelectorAll('.pipeline-col').forEach(c => c.classList.remove('drag-over'));
+}
+function onDragOver(e, stage) {
+  e.preventDefault();
+  document.querySelectorAll('.pipeline-col').forEach(c => c.classList.remove('drag-over'));
+  document.getElementById('col-' + stage).classList.add('drag-over');
+}
+function onDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+function onDrop(e, stage) {
+  e.preventDefault();
+  const deal = deals.find(d => d.id === draggedDealId);
+  if (deal) { deal.stage = stage; renderPipeline(); }
+  draggedDealId = null;
+}
+
+// --- MODALS ---
+function openModal() { document.getElementById('contact-modal').classList.add('open'); }
+function closeModal() {
+  document.getElementById('contact-modal').classList.remove('open');
+  ['f-name','f-company','f-email'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-status').value = 'prospect';
+}
+function saveContact() {
+  const name = document.getElementById('f-name').value.trim();
+  const company = document.getElementById('f-company').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const status = document.getElementById('f-status').value;
+  if (!name || !email) return;
+  contacts.push({ id: nextContactId++, name, company, email, status });
+  closeModal();
+  if (currentPage === 'contacts') renderContacts(contacts);
+}
+
+function openDealModal() { document.getElementById('deal-modal').classList.add('open'); }
+function closeDealModal() {
+  document.getElementById('deal-modal').classList.remove('open');
+  ['d-title','d-client','d-value'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('d-stage').value = 'new-lead';
+}
+function saveDeal() {
+  const title = document.getElementById('d-title').value.trim();
+  const client = document.getElementById('d-client').value.trim();
+  const value = parseInt(document.getElementById('d-value').value) || 0;
+  const stage = document.getElementById('d-stage').value;
+  if (!title) return;
+  const now = new Date();
+  const date = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  deals.push({ id: nextDealId++, title, client, value, stage, date });
+  closeDealModal();
+  if (currentPage === 'pipeline') renderPipeline();
+  if (currentPage === 'dashboard') renderDashboard();
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if (e.target === overlay) { closeModal(); closeDealModal(); } });
+});
+
+// --- INIT ---
+renderDashboard();
+renderContacts(contacts);
+</script>
+</body>
+</html>
