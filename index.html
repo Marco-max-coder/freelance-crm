@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -174,6 +174,89 @@
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 
   #app { display: flex; }
+
+  /* AI ASSISTANT */
+  #ai-fab {
+    position: fixed; bottom: 28px; right: 28px; z-index: 150;
+    width: 52px; height: 52px; border-radius: 50%; border: none;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    color: #fff; font-size: 1.3rem; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(110,231,183,0.3);
+    transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+  }
+  #ai-fab:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(110,231,183,0.5); }
+
+  #ai-panel {
+    position: fixed; bottom: 92px; right: 28px; z-index: 150;
+    width: 360px; max-width: calc(100vw - 40px);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    display: none; flex-direction: column; overflow: hidden;
+    animation: slideUp 0.22s ease;
+  }
+  #ai-panel.open { display: flex; }
+  @keyframes slideUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+  .ai-header {
+    padding: 16px 18px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .ai-header-left { display: flex; align-items: center; gap: 10px; }
+  .ai-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .ai-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem; }
+  .ai-subtitle { font-size: 0.72rem; color: var(--muted); }
+  .ai-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; }
+  .ai-close:hover { color: var(--text); }
+
+  .ai-messages {
+    flex: 1; padding: 14px; display: flex; flex-direction: column; gap: 10px;
+    max-height: 280px; overflow-y: auto; min-height: 80px;
+  }
+  .ai-msg { display: flex; gap: 8px; align-items: flex-start; }
+  .ai-msg.user { flex-direction: row-reverse; }
+  .ai-bubble {
+    padding: 9px 13px; border-radius: 12px; font-size: 0.82rem; max-width: 85%; line-height: 1.5;
+  }
+  .ai-msg.assistant .ai-bubble { background: var(--surface2); color: var(--text); border-radius: 4px 12px 12px 12px; }
+  .ai-msg.user .ai-bubble { background: linear-gradient(135deg, var(--accent2), var(--accent)); color: #0d0f14; font-weight: 500; border-radius: 12px 4px 12px 12px; }
+  .ai-msg-icon { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; }
+  .ai-msg.assistant .ai-msg-icon { background: linear-gradient(135deg, var(--accent2), var(--accent)); color: #fff; }
+  .ai-msg.user .ai-msg-icon { background: var(--surface2); color: var(--muted); }
+
+  .ai-thinking { display: flex; gap: 4px; align-items: center; padding: 9px 13px; }
+  .ai-thinking span { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: bounce 1.2s infinite; }
+  .ai-thinking span:nth-child(2) { animation-delay: 0.2s; }
+  .ai-thinking span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+
+  .ai-suggestions { padding: 0 14px 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .ai-suggestion {
+    padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; cursor: pointer;
+    background: var(--surface2); border: 1px solid var(--border); color: var(--muted);
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .ai-suggestion:hover { border-color: var(--accent); color: var(--accent); }
+
+  .ai-input-row {
+    padding: 12px 14px; border-top: 1px solid var(--border);
+    display: flex; gap: 8px; align-items: center;
+  }
+  .ai-input {
+    flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 8px 12px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+    outline: none; resize: none; transition: border-color 0.18s; height: 36px;
+  }
+  .ai-input:focus { border-color: var(--accent); }
+  .ai-input::placeholder { color: var(--muted); }
+  .ai-send {
+    width: 36px; height: 36px; border-radius: 10px; border: none;
+    background: var(--accent); color: #0d0f14; cursor: pointer; font-size: 1rem;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: all 0.18s;
+  }
+  .ai-send:hover { background: #5dd4a5; }
+  .ai-send:disabled { opacity: 0.4; cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -601,7 +684,124 @@ async function saveDeal() {
 }
 
 document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o){closeModal();closeDealModal();} }));
+
+// --- AI ASSISTANT ---
+function toggleAI() { document.getElementById('ai-panel').classList.toggle('open'); }
+function closeAI() { document.getElementById('ai-panel').classList.remove('open'); }
+function aiSuggest(text) { document.getElementById('ai-input').value = text; sendAIMessage(); }
+
+function addAIMessage(role, text) {
+  const container = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = `ai-msg ${role}`;
+  div.innerHTML = `<div class="ai-msg-icon">${role==='user'?'👤':'✦'}</div><div class="ai-bubble">${text}</div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function showThinking() {
+  const container = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = 'ai-msg assistant'; div.id = 'ai-thinking-bubble';
+  div.innerHTML = `<div class="ai-msg-icon">✦</div><div class="ai-bubble ai-thinking"><span></span><span></span><span></span></div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+function removeThinking() { const el = document.getElementById('ai-thinking-bubble'); if(el) el.remove(); }
+
+async function sendAIMessage() {
+  const input = document.getElementById('ai-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  addAIMessage('user', text);
+  document.getElementById('ai-send').disabled = true;
+  showThinking();
+
+  const contacts = await getContacts();
+  const deals = await getDeals();
+  const contextStr = `Contacts: ${JSON.stringify(contacts.map(c=>({name:c.name,company:c.company,email:c.email,status:c.status})))}\nDeals: ${JSON.stringify(deals.map(d=>({id:d.id,title:d.title,client:d.client,value:d.value,stage:d.stage})))}`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `You are an AI assistant for a freelancer CRM app.\n\n${contextStr}\n\nBased on the user message, respond ONLY with a JSON object:\n{"action":"add_contact"|"add_deal"|"update_deal_stage"|"none","data":{...},"message":"confirmation in user language"}\n\nadd_contact data: {name,company,email,status("active"|"prospect"|"inactive")}\nadd_deal data: {title,client,value(number),stage("new-lead"|"proposal"|"negotiating"|"won"|"lost")}\nupdate_deal_stage data: {deal_id,stage}\nnone: data={}, message=helpful reply\n\nReturn ONLY valid JSON, no markdown.`,
+        messages: [{ role: 'user', content: text }]
+      })
+    });
+
+    const result = await response.json();
+    removeThinking();
+    let parsed;
+    try {
+      const raw = result.content[0].text.replace(/```json|```/g,'').trim();
+      parsed = JSON.parse(raw);
+    } catch {
+      addAIMessage('assistant', result.content?.[0]?.text || 'Could not understand that, try again.');
+      document.getElementById('ai-send').disabled = false;
+      return;
+    }
+
+    if (parsed.action === 'add_contact' && parsed.data) {
+      await addContact({ name:parsed.data.name||'', company:parsed.data.company||'', email:parsed.data.email||'', status:parsed.data.status||'prospect' });
+      if (currentPage==='contacts') renderContacts();
+      if (currentPage==='dashboard') renderDashboard();
+    } else if (parsed.action === 'add_deal' && parsed.data) {
+      const now = new Date();
+      await addDeal({ title:parsed.data.title||'', client:parsed.data.client||'', value:Number(parsed.data.value)||0, stage:parsed.data.stage||'new-lead', date:`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}` });
+      if (currentPage==='pipeline') renderPipeline();
+      if (currentPage==='dashboard') renderDashboard();
+    } else if (parsed.action === 'update_deal_stage' && parsed.data?.deal_id) {
+      await updateDealStage(parsed.data.deal_id, parsed.data.stage);
+      if (currentPage==='pipeline') renderPipeline();
+      if (currentPage==='dashboard') renderDashboard();
+    }
+    addAIMessage('assistant', parsed.message || 'Done!');
+  } catch(err) {
+    removeThinking();
+    addAIMessage('assistant', 'Connection error. Try again.');
+  }
+  document.getElementById('ai-send').disabled = false;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const inp = document.getElementById('ai-input');
+  if (inp) inp.addEventListener('keydown', e => { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendAIMessage();} });
+});
 </script>
+
+<!-- AI FAB -->
+<button id="ai-fab" onclick="toggleAI()" title="AI Assistant">✦</button>
+
+<!-- AI PANEL -->
+<div id="ai-panel">
+  <div class="ai-header">
+    <div class="ai-header-left">
+      <div class="ai-dot"></div>
+      <div><div class="ai-title">AI Assistant</div><div class="ai-subtitle">Tell me what to do</div></div>
+    </div>
+    <button class="ai-close" onclick="closeAI()">✕</button>
+  </div>
+  <div class="ai-messages" id="ai-messages">
+    <div class="ai-msg assistant">
+      <div class="ai-msg-icon">✦</div>
+      <div class="ai-bubble">Hi! Tell me what you need — I can add contacts, create deals, or update existing ones. Just write naturally!</div>
+    </div>
+  </div>
+  <div class="ai-suggestions">
+    <span class="ai-suggestion" onclick="aiSuggest('Add contact Mario Rossi from Acme, mario@acme.it')">+ Add contact</span>
+    <span class="ai-suggestion" onclick="aiSuggest('New deal: Website for TechFlow, €3000, negotiating')">+ New deal</span>
+    <span class="ai-suggestion" onclick="aiSuggest('Move my latest deal to won')">✓ Move to won</span>
+  </div>
+  <div class="ai-input-row">
+    <input class="ai-input" id="ai-input" placeholder="e.g. Add contact John from Apple…" />
+    <button class="ai-send" id="ai-send" onclick="sendAIMessage()">➤</button>
+  </div>
+</div>
 </body>
 </html>
 
