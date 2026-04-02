@@ -736,10 +736,14 @@ async function sendAIMessage() {
     removeThinking();
     let parsed;
     try {
-      const raw = result.content[0].text.replace(/```json|```/g,'').trim();
-      parsed = JSON.parse(raw);
-    } catch {
-      addAIMessage('assistant', result.content?.[0]?.text || 'Could not understand that, try again.');
+      const rawText = result.content[0].text;
+      const raw = rawText.replace(/```json|```/g,'').trim();
+      // Try to extract JSON if wrapped in text
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      parsed = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
+    } catch(parseErr) {
+      const fallbackText = result.content?.[0]?.text || 'Could not understand that, try again.';
+      addAIMessage('assistant', fallbackText);
       document.getElementById('ai-send').disabled = false;
       return;
     }
@@ -802,4 +806,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 </body>
 </html>
-
