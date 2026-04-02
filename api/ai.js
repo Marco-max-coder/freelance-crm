@@ -17,7 +17,7 @@ export default async function handler(req, res) {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-3-haiku-20240307',
         max_tokens: 1000,
         system,
         messages
@@ -25,7 +25,6 @@ export default async function handler(req, res) {
     });
  
     const data = await response.json();
-    console.log('STATUS:', response.status);
     console.log('RESPONSE:', JSON.stringify(data));
  
     if (data.error) {
