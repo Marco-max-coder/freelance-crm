@@ -723,12 +723,10 @@ async function sendAIMessage() {
   const contextStr = `Contacts: ${JSON.stringify(contacts.map(c=>({name:c.name,company:c.company,email:c.email,status:c.status})))}\nDeals: ${JSON.stringify(deals.map(d=>({id:d.id,title:d.title,client:d.client,value:d.value,stage:d.stage})))}`;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('/api/ai', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
         system: `You are an AI assistant for a freelancer CRM app.\n\n${contextStr}\n\nBased on the user message, respond ONLY with a JSON object:\n{"action":"add_contact"|"add_deal"|"update_deal_stage"|"none","data":{...},"message":"confirmation in user language"}\n\nadd_contact data: {name,company,email,status("active"|"prospect"|"inactive")}\nadd_deal data: {title,client,value(number),stage("new-lead"|"proposal"|"negotiating"|"won"|"lost")}\nupdate_deal_stage data: {deal_id,stage}\nnone: data={}, message=helpful reply\n\nReturn ONLY valid JSON, no markdown.`,
         messages: [{ role: 'user', content: text }]
       })
